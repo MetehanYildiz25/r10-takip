@@ -1,0 +1,40 @@
+name: R10 Takip
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # her 10 dakikada bir (GitHub bazen birkaç dakika geciktirir)
+  workflow_dispatch:          # Actions sekmesinden elle çalıştırmak için
+
+permissions:
+  contents: write             # seen.json'u geri kaydetmek için
+
+concurrency:
+  group: r10-takip
+  cancel-in-progress: false
+
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: R10'u tara ve Telegram'a gönder
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python r10_takip.py
+
+      - name: Görülen ilanları kaydet
+        run: |
+          git config user.name "r10-takip-bot"
+          git config user.email "r10-takip-bot@users.noreply.github.com"
+          git add seen.json
+          git diff --cached --quiet || (git commit -m "seen.json güncellendi" && git push)
