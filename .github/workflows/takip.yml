@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "*/10 * * * *"   # her 10 dakikada bir (GitHub bazen birkaç dakika geciktirir)
   workflow_dispatch:          # Actions sekmesinden elle çalıştırmak için
+    inputs:
+      test:
+        description: "Sadece Telegram bağlantı testi yap"
+        type: boolean
+        default: false
 
 permissions:
   contents: write             # seen.json'u geri kaydetmek için
@@ -30,7 +35,7 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: python r10_takip.py
+        run: python r10_takip.py ${{ inputs.test && '--test' || '' }}
 
       - name: Görülen ilanları kaydet
         run: |
