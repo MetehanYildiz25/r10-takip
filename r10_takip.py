@@ -43,6 +43,7 @@ BLACKLIST = [
     "hit bot", "hit botu", "cookie", "takipçi", "takipci", "beğeni", "begeni",
     "kilit açıcı", "kilit acici", "toplu mesaj", "dm bot", "bahis", "casino",
     "kripto", "coin", "yatırım yap", "satış başına", "referans kod",
+    "izlenme", "video bot", "düzenleme öner", "yorum yap", "sahte",
     # satıcı ilanları (iş veren değil, hizmet satan)
     "satış:", "yaparım", "yapariz", "yaparız", "hizmeti", "hizmetleri", "sunuyorum",
     "geliştiriyorum", "faturalı", "indirim", "ücretsiz web",
@@ -92,7 +93,7 @@ def send_telegram(cfg, text):
 def fetch_threads(session, slug):
     r = session.get(f"https://www.r10.net/{slug}/", timeout=30)
     r.raise_for_status()
-    soup = BeautifulSoup(r.content, "html.parser")
+    soup = BeautifulSoup(r.content, "html.parser", from_encoding="utf-8")
     threads = []
     for a in soup.select('a[id^="thread_title_"]'):
         m = THREAD_ID_RE.search(a.get("href", ""))
@@ -120,19 +121,35 @@ def fetch_threads(session, slug):
     return threads
 
 
+def fix_mojibake(text):
+    """Bazı ilanlar sitede bozuk kayıtlı (UTF-8 metin cp1250 gibi okunmuş: 'Ä±', 'Ĺź')."""
+    if not re.search("[ÄĹĂ]", text):
+        return text
+    for enc in ("cp1250", "cp1252", "latin-1"):
+        try:
+            return text.encode(enc).decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            continue
+    return text
+
+
 def fetch_first_post(session, url):
     try:
         r = session.get(url, timeout=30)
-        soup = BeautifulSoup(r.content, "html.parser")
+        soup = BeautifulSoup(r.content, "html.parser", from_encoding="utf-8")
         m = soup.select_one(".postContent, [id^=post_message]")
-        text = m.get_text(" ", strip=True) if m else ""
+        text = fix_mojibake(m.get_text(" ", strip=True)) if m else ""
         return text[:350] + ("…" if len(text) > 350 else "")
     except requests.RequestException:
         return ""
 
 
+def tr_lower(text):
+    return text.replace("İ", "i").replace("I", "ı").lower()
+
+
 def is_blacklisted(title):
-    t = title.lower()
+    t = tr_lower(title)
     return any(w in t for w in BLACKLIST)
 
 
