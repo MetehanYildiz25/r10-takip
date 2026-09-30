@@ -44,4 +44,10 @@ Telegram'a "bağlantı testi başarılı" mesajı gelmeli.
 - Elle çalıştırmak / test: Actions → R10 Takip → **Run workflow** (test kutusunu işaretlersen sadece Telegram testi yapar).
 - Durdurmak: Actions → R10 Takip → **⋯** → **Disable workflow**.
 - Token yenilenirse: `gh secret set TELEGRAM_TOKEN` (veya Settings → Secrets and variables → Actions).
-- Bilgisayardaki "R10 Takip" zamanlanmış görevi, çift bildirim olmasın diye **devre dışı**.
+- ⚠️ 2026-09-30: GitHub'ın zamanlayıcısı bu depoda çalışmadı (sadece elle tetikleme çalışıyor).
+
+## Şu anki düzen
+- Bilgisayardaki "R10 Takip" görevi her 10 dakikada `r10_yerel.py` çalıştırır (bilgisayar açıkken).
+- `r10_yerel.py` önce GitHub'dan `seen.json`'u çeker, tarar, sonra geri gönderir; GitHub Actions da
+  çalışmaya başlarsa aynı ilan iki kez gelmez.
+- Bilgisayar kapalıyken de çalışması için: cron-job.org ile GitHub'ı 10 dakikada bir tetiklemek (kurulmadı).
