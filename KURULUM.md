@@ -36,3 +36,12 @@ Telegram'a "bağlantı testi başarılı" mesajı gelmeli.
 - Kategori veya yasaklı kelime eklemek için: `r10_takip.py` içindeki `CATEGORIES` ve `BLACKLIST`.
 - Durdurmak için: `schtasks /change /tn "R10 Takip" /disable`
 - Silmek için: `schtasks /delete /tn "R10 Takip" /f`
+
+## GitHub Actions (7/24, bilgisayar kapalıyken de çalışır) — AKTİF
+- Depo: https://github.com/MetehanYildiz25/r10-takip
+- Token ve chat ID, depo ayarlarında **Secrets** olarak saklanıyor (`TELEGRAM_TOKEN`, `CHAT_ID`); kodda yok.
+- Çalışma geçmişi: depo → **Actions** sekmesi.
+- Elle çalıştırmak / test: Actions → R10 Takip → **Run workflow** (test kutusunu işaretlersen sadece Telegram testi yapar).
+- Durdurmak: Actions → R10 Takip → **⋯** → **Disable workflow**.
+- Token yenilenirse: `gh secret set TELEGRAM_TOKEN` (veya Settings → Secrets and variables → Actions).
+- Bilgisayardaki "R10 Takip" zamanlanmış görevi, çift bildirim olmasın diye **devre dışı**.
